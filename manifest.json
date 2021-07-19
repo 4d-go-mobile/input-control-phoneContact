@@ -1,5 +1,6 @@
 {
     "name": "phoneContact",
+    "type": "text",
     "inject": true,
     "capabilities": {
           "contacts": true,
