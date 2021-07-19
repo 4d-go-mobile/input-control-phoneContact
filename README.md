@@ -40,3 +40,7 @@ Edit `Settings/Settings.plist`file and add or modify `application.service`key to
 		<string>PhoneContactRowService</string>
 	</array>
 ```
+
+## TODO
+
+- [ ] More code to be sure we ask access to contact, could check if contact allowed, provide a way to open setting if deactivate etc...
