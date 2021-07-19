@@ -1,0 +1,12 @@
+{
+    "name": "phoneContact",
+    "inject": true,
+    "capabilities": {
+          "contacts": true,
+          "settings": {
+              "application.services": [
+                  "PhoneContactRowService"
+              ]
+          }
+      }
+  }
