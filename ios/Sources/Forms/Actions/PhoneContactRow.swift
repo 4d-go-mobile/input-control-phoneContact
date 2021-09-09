@@ -38,7 +38,7 @@ open class PhoneContactCell: PhoneCell, CNContactPickerDelegate {
     open override func setup() {
         super.setup()
 
-        let pickButton = UIButton(primaryAction: UIAction(title: "", image: UIImage(systemName: "phone.circle"), identifier: nil, discoverabilityTitle: "phone pick", attributes: [], state: .on, handler: { action in
+        let pickButton = UIButton(primaryAction: UIAction(title: "", image: UIImage(named: "phoneContact") ?? UIImage(systemName: "phone.circle"), identifier: nil, discoverabilityTitle: "phone pick", attributes: [], state: .on, handler: { action in
             self.pickContactProperty(CNContactPhoneNumbersKey)
         }))
 
