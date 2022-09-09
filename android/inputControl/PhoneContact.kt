@@ -1,0 +1,70 @@
+package ___PACKAGE___
+
+import android.content.Context
+import android.net.Uri
+import android.provider.ContactsContract
+import android.view.View
+import com.qmobile.qmobiledatasync.utils.BaseInputControl
+import com.qmobile.qmobiledatasync.utils.InputControl
+import com.qmobile.qmobileui.activity.mainactivity.MainActivity
+import com.qmobile.qmobileui.ui.SnackbarHelper
+import com.qmobile.qmobileui.utils.PermissionChecker
+
+@InputControl
+class PhoneContact(private val view: View) : BaseInputControl {
+
+    private lateinit var outputCallback: (outputText: String) -> Unit
+
+    private val contactPhoneNumberCallback: (contactUri: Uri?) -> Unit = { contactUri ->
+        contactUri?.let {
+            (view.context as MainActivity?)?.apply {
+                contentResolver.query(contactUri, null, null, null, null)?.let { cursor ->
+                    if (cursor.moveToFirst()) {
+                        val contactIdIndex = cursor.getColumnIndex(ContactsContract.Contacts._ID)
+                        val hasPhoneIndex = cursor.getColumnIndex(ContactsContract.Contacts.HAS_PHONE_NUMBER)
+                        val contactId = cursor.getString(contactIdIndex)
+                        val hasNumber = cursor.getString(hasPhoneIndex)
+                        if (Integer.valueOf(hasNumber) == 1) {
+                            contentResolver.query(
+                                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                                null,
+                                ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId,
+                                null,
+                                null
+                            )?.let { numbersCursor ->
+                                while (numbersCursor.moveToNext()) {
+                                    val phoneNumberIndex =
+                                        numbersCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                                    val phoneNumber = numbersCursor.getString(phoneNumberIndex)
+                                    outputCallback(phoneNumber)
+                                    break
+                                }
+                            }
+                        } else {
+                            SnackbarHelper.show(this, "No phone number found in contact")
+                            outputCallback("")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onClick(outputCallback: (outputText: String) -> Unit) {
+        askPermission(view.context) {
+            this.outputCallback = outputCallback
+            (view.context as MainActivity?)?.launchContactPhoneNumber(contactPhoneNumberCallback)
+        }
+    }
+
+    private fun askPermission(context: Context, canGoOn: () -> Unit) {
+        (context as PermissionChecker?)?.askPermission(
+            permission = android.Manifest.permission.READ_CONTACTS,
+            rationale = "Permission required to read contacts"
+        ) { isGranted ->
+            if (isGranted) {
+                canGoOn()
+            }
+        }
+    }
+}
