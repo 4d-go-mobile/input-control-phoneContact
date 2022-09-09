@@ -3,11 +3,12 @@
     "type": "text",
     "inject": true,
     "capabilities": {
-          "contacts": true,
-          "settings": {
-              "application.services": [
-                  "PhoneContactRowService"
-              ]
-          }
-      }
-  }
+        "contacts": true,
+        "settings": {
+            "application.services": [
+                "PhoneContactRowService"
+            ]
+        }
+    },	
+    "target" : ["ios", "android"]
+}
