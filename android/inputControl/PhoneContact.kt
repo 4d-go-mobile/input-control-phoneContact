@@ -1,11 +1,12 @@
 package ___PACKAGE___
 
-import android.content.Context
 import android.net.Uri
 import android.provider.ContactsContract
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import com.qmobile.qmobiledatasync.utils.BaseInputControl
 import com.qmobile.qmobiledatasync.utils.InputControl
+import com.qmobile.qmobileui.activity.mainactivity.ActivityResultController
 import com.qmobile.qmobileui.activity.mainactivity.MainActivity
 import com.qmobile.qmobileui.ui.SnackbarHelper
 import com.qmobile.qmobileui.utils.PermissionChecker
@@ -13,6 +14,12 @@ import com.qmobile.qmobileui.utils.PermissionChecker
 @InputControl
 class PhoneContact(private val view: View) : BaseInputControl {
 
+    override val autocomplete: Boolean = false
+
+    override fun getIconName(): String {
+        return "call.xml"
+    }
+    
     private lateinit var outputCallback: (outputText: String) -> Unit
 
     private val contactPhoneNumberCallback: (contactUri: Uri?) -> Unit = { contactUri ->
@@ -50,20 +57,18 @@ class PhoneContact(private val view: View) : BaseInputControl {
         }
     }
 
-    override fun onClick(outputCallback: (outputText: String) -> Unit) {
-        askPermission(view.context) {
-            this.outputCallback = outputCallback
-            (view.context as MainActivity?)?.launchContactPhoneNumber(contactPhoneNumberCallback)
-        }
-    }
-
-    private fun askPermission(context: Context, canGoOn: () -> Unit) {
-        (context as PermissionChecker?)?.askPermission(
+    override fun process(inputValue: Any?, outputCallback: (output: Any) -> Unit) {
+        (view.context as PermissionChecker?)?.askPermission(
             permission = android.Manifest.permission.READ_CONTACTS,
             rationale = "Permission required to read contacts"
         ) { isGranted ->
             if (isGranted) {
-                canGoOn()
+                this.outputCallback = outputCallback
+                (view.context as ActivityResultController?)?.launch(
+                    type = ActivityResultContracts.PickContact(),
+                    input = null,
+                    callback = contactPhoneNumberCallback
+                )
             }
         }
     }
